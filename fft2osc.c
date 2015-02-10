@@ -26,48 +26,52 @@ double* outSamples;
 
 int main(int argc, char **argv)
 {
-    
-	// ------------------
-	// COMMAND LINE ARGUMENTS PARSING
-	// ------------------
+
+    // ------------------
+    // COMMAND LINE ARGUMENTS PARSING
+    // ------------------
 
     char* infilename;
     char* outfilename;
-	int opt;
-	
-	while ((opt = getopt(argc, argv, "s:t:p:")) != -1) {
-		switch (opt) {
-			case 's' :
-				fftSize = atoi(optarg);
-				break;
-			case 't' :
-				if (atof(optarg) <= 0) {return EXIT_FAILURE;}
-				timeStretchFactor = atof(optarg);
-				break;
-			case 'p' :
-				if (atof(optarg) <= 0) {return EXIT_FAILURE;}
-				pitchShiftFactor = atof(optarg);
-				break;
-			default :
-				printHelp();
-				return EXIT_FAILURE;
-		}
-	}
+    int opt;
 
-	if (argv[optind] == NULL || argv[optind + 1] == NULL) {
-  		printHelp();
-  		return EXIT_FAILURE;
-	}
+    while ((opt = getopt(argc, argv, "s:t:p:")) != -1) {
+        switch (opt) {
+        case 's' :
+            fftSize = atoi(optarg);
+            break;
+        case 't' :
+            if (atof(optarg) <= 0) {
+                return EXIT_FAILURE;
+            }
+            timeStretchFactor = atof(optarg);
+            break;
+        case 'p' :
+            if (atof(optarg) <= 0) {
+                return EXIT_FAILURE;
+            }
+            pitchShiftFactor = atof(optarg);
+            break;
+        default :
+            printHelp();
+            return EXIT_FAILURE;
+        }
+    }
 
-	infilename = argv[optind];
-	outfilename = argv[optind + 1];
+    if (argv[optind] == NULL || argv[optind + 1] == NULL) {
+        printHelp();
+        return EXIT_FAILURE;
+    }
+
+    infilename = argv[optind];
+    outfilename = argv[optind + 1];
 
     // ---------
     // ERROR CHECKING
     // ---------
 
     if ((fftSize & (fftSize-1)) != 0 && fftSize < 8 && fftSize > 65536) {
-		printHelp();
+        printHelp();
         return EXIT_FAILURE;
     }
 
@@ -77,7 +81,7 @@ int main(int argc, char **argv)
 
     // FFT on N real numbers gives an output of N/2+1 complex numbers
     int fftOutputSize = (fftSize/2)+1;
-	
+
     // ----------
     // SNDFILE
     // ----------
@@ -107,7 +111,7 @@ int main(int argc, char **argv)
         fftData[i] = fftw_malloc(sizeof(fftw_complex) * fftOutputSize);
     }
 
- 	// declaring FFTW's plan
+    // declaring FFTW's plan
     fftw_plan p;
 
     // ------------
