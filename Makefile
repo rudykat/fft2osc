@@ -1,6 +1,6 @@
 P=fft2osc
 OBJECTS=fft2osc.o
-CFLAGS= -std=gnu11 -g -Wall -O0
+CFLAGS= -std=gnu11 -g -Wall -O3
 LDFLAGS= -lm -lsndfile -lfftw3
 CC=clang
 
