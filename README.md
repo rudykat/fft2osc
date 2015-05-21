@@ -7,6 +7,7 @@ You can compile this program with gcc or clang. The required dependencies are th
 
 Beware : this program was at the beginning an uni project, and is only a proof of concept. 
 The resynthesized file will be loaded with clicks and pops, and even if I know why, I don't really know how to implement a practical solution. 
+
 Moreover, it can't handle stereo and multichannel audiofiles, and it's slow when you use a relatively big FFT size.
 
 Finally, I learned C while I was making it, and even for a small project, it's not a very maintainable one. 
