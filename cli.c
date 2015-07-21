@@ -69,5 +69,5 @@ Params get_params(int argc, char** argv)
 		params.out_file_path = argv[optind + 1];
 	}
 	
-	return params;
+
 }
