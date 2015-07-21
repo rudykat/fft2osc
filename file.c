@@ -10,7 +10,6 @@ static bool file_is_readable = true;
 void init_in_file(const char* path, int proto_buff_size)
 {
 	in_file_ptr = sf_open(path, SFM_READ, &in_file_info);
-	
 	if (in_file_info.channels > 2) {
 		printf("Files with more than 2 channels will be uncorrectly processed");
 	}
@@ -29,9 +28,7 @@ int get_samplerate()
 bool get_samples(double* buffer, int buff_size) 
 {
 	if (file_is_readable == false) return false;
-	
 	sf_count_t counter = sf_read_double(in_file_ptr, buffer, buff_size);
-	
 	if ((int) counter != buff_size) {
 		for (int i = (int) counter; i < buff_size; i++) {
 			buffer[i] = 0.0;
