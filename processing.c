@@ -14,7 +14,6 @@ void init_fftw(int fft_size, int sr, int ch)
 {
 	N = fft_size;
 	fft_data = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (N/2+1));
-	 
 	channels = ch;
 	samplerate = sr;
 }
@@ -36,9 +35,8 @@ static void get_phase(double* phase_data)
 void process_buff(double* in, int p_shift, double* out, int out_size)
 {
 	// buff -> FFTw plan -> getAmp & getPhase
-	
 	p = fftw_plan_dft_r2c_1d(N, in, fft_data, FFTW_ESTIMATE);
-    fftw_execute(p);
+	fftw_execute(p);
     
     double amp[N/2+1], phase[N/2+1];
     get_amplitude(amp);
