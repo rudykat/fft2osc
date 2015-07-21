@@ -28,7 +28,7 @@ Params get_params(int argc, char** argv)
     
     while ((opt = getopt(argc, argv, "s:t:p:h")) != -1) {
         switch (opt) {
-        case 's' :
+			case 's' :
 			s = atoi(optarg);
 			if ((s & (s-1)) != 0 || s < 16 || s > 65536) {
 				params.correct_params = false;
