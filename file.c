@@ -1,61 +1,86 @@
 #include <sndfile.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
-static SF_INFO in_file_info;
-static SNDFILE* in_file_ptr;
-static SNDFILE* out_file_ptr;
-static bool file_is_readable = true;
+static SF_INFO in_info;
+static SNDFILE* in_ptr;
+static SNDFILE* out_ptr;
+static sf_count_t remaining_frames;
+static double* ch_samples; // = channel samples
 
-void init_in_file(const char* path, int proto_buff_size)
+int init_in_file(const char* path)
 {
-	in_file_ptr = sf_open(path, SFM_READ, &in_file_info);
-	if (in_file_info.channels > 2) {
-		printf("Files with more than 2 channels will be uncorrectly processed");
-	}
-}
-
-int get_nb_of_channels() 
-{
-	return in_file_info.channels;
+        in_info.format = 0; // see libsndfile dpc
+        in_ptr = sf_open(path, SFM_READ, &in_info);
+	if (in_ptr == NULL)
+	        return -1;
+	// else
+	ch_samples = malloc(sizeof(double) * in_info.frames);
+	return in_info.channels;
 }
 
 int get_samplerate()
 {
-	return in_file_info.samplerate;
+	return in_info.samplerate;
 }
 
-bool get_samples(double* buffer, int buff_size) 
+bool channel_to_mem()
 {
-	if (file_is_readable == false) return false;
-	sf_count_t counter = sf_read_double(in_file_ptr, buffer, buff_size);
-	if ((int) counter != buff_size) {
-		for (int i = (int) counter; i < buff_size; i++) {
+	remaining_frames = sf_read_double(in_ptr, ch_samples, in_info.frames);
+	if (remaining_frames == 0) return false;
+	else return true;
+}
+
+bool get_samples(double* buffer, int fft_size)
+{
+        sf_count_t index = in_info.frames - remaining_frames;
+
+	// Regular case
+	if (remaining_frames > fft_size) {
+	        memcpy(buffer, (double*) ch_samples + index, fft_size * sizeof(double));
+		remaining_frames -= fft_size;
+		index += fft_size;
+	}
+
+	// Defense against out of bounds memory-reading
+	else if (remaining_frames == 0) {
+	        return false; // Stop reading the memory
+	}
+	// Add some zeros at the end of buffer, if in_info.frames % fft_size != 0
+	else if (remaining_frames < fft_size) {
+		memcpy(buffer, (double*) ch_samples + index, remaining_frames * sizeof(double));
+		for (int i = fft_size-1; i >= remaining_frames; i--) {
 			buffer[i] = 0.0;
 		}
-		file_is_readable = false;
+		// remaining_frames -= fft_size;
+		return false;
 	}
 	
-	return file_is_readable;
+	// else
+	return true; // main() can continue to read the mem
 }
 
-void init_out_file(const char* path) 
+void init_out_file(const char* path)
 {
-	out_file_ptr = sf_open(path, SFM_WRITE, &in_file_info);
+        SF_INFO info_copy = in_info; // needed, otherwise channel_to_mem() will fail...
+        out_ptr = sf_open(path, SFM_WRITE, &info_copy);
 }
 
-void write_out_file(double* buffer, double buff_size) 
+void write_out_file(double* buffer, long size)
 {
-	sf_write_double(out_file_ptr, buffer, buff_size);
+        sf_write_double(out_ptr, buffer, size);
 }
 
-void free_file_handling() 
+void free_file_handling()
 {
-	sf_close(in_file_ptr);
-	sf_close(out_file_ptr);
+	free(ch_samples);
+	sf_close(in_ptr);
+	sf_close(out_ptr);
 }
-
-void free_file_failure() 
+/*
+void free_file_failure()
 {
-	sf_close(out_file_ptr);
+	sf_close(in_ptr);
 }
+*/
